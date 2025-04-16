@@ -2,12 +2,14 @@
 #version 330 core
 
 layout(location = 0) in vec2 position;
+layout(location = 1) in vec3 translation;
 
 uniform mat4 projection;
 uniform mat4 view;
 
 void main() {
-    gl_Position = projection * view * vec4(position, 0.0, 1.0);
+    vec3 worldPosition = translation + vec3(position, 0.0);
+    gl_Position = projection * view * vec4(worldPosition, 1.0);
 }
 
 #shader fragment

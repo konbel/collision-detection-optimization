@@ -11,3 +11,12 @@ void Renderer::draw(const VertexArray &vao, const IndexBuffer &ibo, const Shader
 
     glDrawElements(mode, (int)ibo.getCount(), GL_UNSIGNED_INT, nullptr);
 }
+
+void Renderer::drawInstanced(const VertexArray &vao, const IndexBuffer &ibo, const Shader &shader, const GLenum mode,
+    const unsigned int count) const {
+    vao.bind();
+    ibo.bind();
+    shader.bind();
+
+    glDrawElementsInstanced(mode, ibo.getCount(), GL_UNSIGNED_INT, nullptr, count);
+}

@@ -7,6 +7,8 @@
 
 #include <Renderer.h>
 
+#include <GLFW/glfw3.h>
+
 class Scene {
 protected:
     Renderer renderer;

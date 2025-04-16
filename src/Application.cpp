@@ -121,6 +121,12 @@ int main() {
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
+
+        if (currentScene != sceneManager) {
+            delete sceneManager;
+        }
+
+        delete currentScene;
     }
 
     glfwDestroyWindow(window);

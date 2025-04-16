@@ -11,6 +11,7 @@ set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/vendor/imgui-1.91.9b)
 set(IMGUI_BACKEND_DIR ${IMGUI_DIR}/backends)
 
 add_executable(collision_detection_optimization src/Application.cpp
+        src/rendering/Buffer.cpp
         src/rendering/VertexBuffer.cpp
         src/rendering/VertexArray.cpp
         src/rendering/IndexBuffer.cpp

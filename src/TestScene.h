@@ -1,25 +1,29 @@
 #ifndef TESTSCENE_H
 #define TESTSCENE_H
 
-#include "engine/Scene.h"
+#include "Buffer.h"
 
+#include "engine/Scene.h"
 #include "engine/GameObject.h"
 
 class TestScene : public Scene {
     static constexpr unsigned int CIRCLE_VERTEX_COUNT = 10;
     static constexpr float CIRCLE_RADIUS = 5.0f;
     static constexpr float SPAWN_INTERVAL = 10.0f; // in ms
-
-    Shader m_Shader;
+    static constexpr unsigned int MAX_OBJECT_COUNT = 100000;
 
     VertexArray m_BoxVertexArray;
     IndexBuffer m_BoxIndexBuffer;
+    Shader m_BoxShader;
 
     VertexArray m_CircleVertexArray;
     IndexBuffer m_CircleIndexBuffer;
+    Buffer m_InstanceBuffer;
+    Shader m_CircleShader;
 
-    std::vector<std::unique_ptr<GameObject>> m_GameObjects;
+    std::unique_ptr<GameObject> m_GameObjects[MAX_OBJECT_COUNT];
     float m_SpawnTimer = 0;
+    unsigned int m_SpawnCount = 0;
 
     static IndexBuffer createBoxIndexBuffer();
     static IndexBuffer createCircleIndexBuffer();

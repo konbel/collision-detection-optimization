@@ -2,8 +2,13 @@
 
 #include <imgui.h>
 
-SceneManager::SceneManager(Scene *&currentScenePointer) : m_CurrentScene(currentScenePointer) {
+void Scene::setWindow(GLFWwindow *window) {
+    this->window = window;
 }
+
+SceneManager::SceneManager(Scene *&currentScenePointer) : m_CurrentScene(currentScenePointer) { }
+
+void SceneManager::render() {}
 
 void SceneManager::renderImGui() const {
     glClear(GL_COLOR_BUFFER_BIT);

@@ -1,9 +1,14 @@
 #include "GameObject.h"
 
-glm::vec3 GameObject::getPosition() const {
-    return position;
-}
+GameObject::GameObject(const unsigned int id, const glm::vec2 &position) : m_Id(id), position(position), lastPosition(position) { }
 
-void GameObject::setPosition(const glm::vec3 &vector) {
-    position = vector;
+void GameObject::update(const float deltaTime) {
+    const glm::vec2 velocity = position - lastPosition;
+
+    constexpr float VELOCITY_DAMPING = 40.0f;
+
+    const glm::vec2 newPosition = position + velocity + (acceleration - velocity * VELOCITY_DAMPING) * (deltaTime * deltaTime);
+    lastPosition = position;
+    position = newPosition;
+    acceleration = glm::vec2{ 0 };
 }

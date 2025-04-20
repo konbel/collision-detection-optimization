@@ -20,8 +20,8 @@ add_executable(collision_detection_optimization src/Application.cpp
 
         src/engine/GameObject.cpp
         src/engine/Scene.cpp
+        src/engine/PhysicsSolver.cpp
 
-        src/Circle.cpp
         src/TestScene.cpp
 
         ${IMGUI_DIR}/imgui.cpp

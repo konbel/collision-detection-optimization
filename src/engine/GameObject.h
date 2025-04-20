@@ -4,23 +4,19 @@
 #include "Renderer.h"
 
 class GameObject {
-protected:
-    glm::vec3 position { 0, 0, 0 };
-
-    Renderer &renderer;
-    VertexArray &vao;
-    IndexBuffer &ibo;
-    Shader &shader;
+    unsigned int m_Id;
 
 public:
-    GameObject(Renderer &renderer, VertexArray &vao, IndexBuffer &ibo, Shader &shader) : renderer(renderer), vao(vao), ibo(ibo), shader(shader) {}
-    virtual ~GameObject() = default;
+    glm::vec2 position { 0 };
+    glm::vec2 lastPosition { 0 };
+    glm::vec2 acceleration { 0 };
 
-    virtual void update(const float deltaTime) = 0;
-    virtual void render() = 0;
+    glm::vec3 color { 1 };
 
-    glm::vec3 getPosition() const;
-    void setPosition(const glm::vec3 &vector);
+    GameObject(unsigned int id, const glm::vec2 &position);
+    ~GameObject() = default;
+
+    void update(float deltaTime);
 };
 
 #endif //GAMEOBJECT_H

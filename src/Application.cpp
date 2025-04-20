@@ -9,9 +9,9 @@
 
 #include "TestScene.h"
 
-constexpr float MIN_FPS = 60;
-constexpr float ALLOWED_LOW_FPS_FRAMES = 10;
-constexpr float PAUSE_DELAY = 200; // in ms
+#define USE_MIN_FPS 1                           // Note: Using min FPS may affect scene behavior under fluctuating framerate.
+static constexpr double MIN_FPS = 1 / 60.0f;    //       See main loop comment for more details.
+static constexpr double FPS_CAP = 1 / 60.0f;
 
 int main() {
     if (!glfwInit()) {
@@ -23,7 +23,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(800, 800, "Collision Detection Optimization", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(1920, 1080, "Collision Detection Optimization", NULL, NULL);
     if (!window) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -48,51 +48,52 @@ int main() {
     {
         Scene *currentScene;
         SceneManager *sceneManager = new SceneManager(currentScene);
+        sceneManager->setWindow(window);
         currentScene = sceneManager;
 
         sceneManager->registerScene<TestScene>("Test Scene");
 
-        bool paused = true;
-
         double lastUpdateTime = 0;
-        double currentTime = 0;
+        double lastFrameTime = 0;
+        double currentFrameTime = 0;
         double deltaTime = 0;
-
-        double lowFpsFrames = 0;
 
         while (!glfwWindowShouldClose(window)) {
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
                 glfwSetWindowShouldClose(window, GLFW_TRUE);
             }
 
-            if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
-                paused = false;
-            }
-
-            if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-                paused = true;
-            }
-
             // Update
-            currentTime = glfwGetTime();
-            deltaTime = currentTime - lastUpdateTime;
-            lastUpdateTime = currentTime;
+            currentFrameTime = glfwGetTime();
 
-            if (1.0f / deltaTime < MIN_FPS) {
-                lowFpsFrames++;
-            } else {
-                lowFpsFrames = 0;
+            /*
+             * Checks if the framerate has dropped below the specified MIN_FPS.
+             * If it has, notifies the current scene. How the scene responds to this is up to its implementation.
+             *
+             * Note: This mechanism does not guarantee deterministic behavior.
+             *       The overall sequence of steps remains the same, but the exact number of updates or spawns
+             *       may vary depending on when the framerate dips below the minimum.
+             */
+            #if USE_MIN_FPS
+                if (currentFrameTime - lastFrameTime > MIN_FPS) {
+                    if (currentScene) {
+                        currentScene->updateTooSlow();
+                    }
+                }
+            #endif
+
+            lastFrameTime = currentFrameTime;
+
+            // Scene update loop running at fixed framerate to guarantee deterministic physics.
+            deltaTime = currentFrameTime - lastUpdateTime;
+            if (deltaTime > FPS_CAP) {
+                lastUpdateTime = currentFrameTime;
+                if (currentScene) {
+                    currentScene->update(FPS_CAP);
+                }
             }
 
-            if (lowFpsFrames >= ALLOWED_LOW_FPS_FRAMES) {
-                paused = true;
-            }
-
-            if (!paused && currentScene) {
-                currentScene->update((float)deltaTime);
-            }
-
-            // OpenGL Rendering
+            // Rendering independent of the specified FPS_CAP
             if (currentScene) {
                 currentScene->render();
             }

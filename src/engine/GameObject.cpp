@@ -2,6 +2,10 @@
 
 GameObject::GameObject(const unsigned int id, const glm::vec2 &position) : m_Id(id), position(position), lastPosition(position) { }
 
+unsigned int GameObject::getId() const {
+    return m_Id;
+}
+
 void GameObject::update(const float deltaTime) {
     const glm::vec2 velocity = position - lastPosition;
 

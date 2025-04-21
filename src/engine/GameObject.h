@@ -16,6 +16,8 @@ public:
     GameObject(unsigned int id, const glm::vec2 &position);
     ~GameObject() = default;
 
+    unsigned int getId() const;
+
     void update(float deltaTime);
 };
 

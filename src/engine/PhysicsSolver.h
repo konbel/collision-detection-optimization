@@ -2,6 +2,7 @@
 #define PHYSICSSOLVER_H
 
 #include "GameObject.h"
+#include "CollisionGrid.h"
 
 class PhysicsSolver {
     constexpr static int SUB_STEPS = 8;
@@ -12,6 +13,13 @@ class PhysicsSolver {
     float m_Gravity;
     int m_MaxObjects;
 
+    CollisionGrid m_CollisionGrid;
+
+    void addObjectsToGrid();
+    void solveContact(int atomIdx1, int atomIdx2);
+    void checkAtomCellCollision(int idx, const CollisionCell &c);
+    void checkCellCollision(const CollisionCell &c, int idx);
+    void solveCollisions();
     void updateObjects(float deltaTime);
 
 public:

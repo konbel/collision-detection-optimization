@@ -66,8 +66,8 @@ TestScene::TestScene() : m_BoxIndexBuffer(createBoxIndexBuffer()), m_BoxShader("
     circleVertexBuffer.unbind();
 
     m_InstanceBuffer.bind();
-    unsigned int instanceBufferSize = MAX_OBJECT_COUNT * sizeof(glm::vec2);
-    m_InstanceBuffer.setData(GL_ARRAY_BUFFER, nullptr, instanceBufferSize, GL_DYNAMIC_DRAW);
+    constexpr unsigned int INSTANCE_BUFFER_SIZE = MAX_OBJECT_COUNT * sizeof(InstanceData);
+    m_InstanceBuffer.setData(GL_ARRAY_BUFFER, nullptr, INSTANCE_BUFFER_SIZE, GL_DYNAMIC_DRAW);
 
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)0);
@@ -99,24 +99,11 @@ TestScene::TestScene() : m_BoxIndexBuffer(createBoxIndexBuffer()), m_BoxShader("
     m_CircleShader.unbind();
 }
 
-glm::vec3 TestScene::getRainbowColor() {
-    if (m_Color.r == 1 && m_Color.g < 1 && m_Color.b == 0) {
-        m_Color.g += COLOR_CYCLE_SPEED;
-    } else if (m_Color.r > 0 && m_Color.g == 1 && m_Color.b == 0) {
-        m_Color.r -= COLOR_CYCLE_SPEED;
-    } else if (m_Color.r == 0 && m_Color.g == 1 && m_Color.b < 1) {
-        m_Color.b += COLOR_CYCLE_SPEED;
-    } else if (m_Color.r == 0 && m_Color.g > 0 && m_Color.b == 1) {
-        m_Color.g -= COLOR_CYCLE_SPEED;
-    } else if (m_Color.r < 1 && m_Color.g == 0 && m_Color.b == 1) {
-        m_Color.r += COLOR_CYCLE_SPEED;
-    } else if (m_Color.r == 1 && m_Color.g == 0 && m_Color.b > 0) {
-        m_Color.b -= COLOR_CYCLE_SPEED;
-    }
-
-    m_Color = glm::clamp(m_Color, glm::vec3(0.0f), glm::vec3(1.0f));
-
-    return m_Color;
+glm::vec3 TestScene::getRainbowColor(const float t) {
+    const float r = sin(t);
+    const float g = sin(t + 0.66f * M_PI);
+    const float b = sin(t + 1.32f * M_PI);
+    return glm::vec3(1.0 * r * r, 1.0 * g * g, 1.0 * b * b);
 }
 
 void TestScene::update(const float deltaTime) {
@@ -143,10 +130,10 @@ void TestScene::update(const float deltaTime) {
     // Spawn objects
     if (m_Emit) {
         for (int i = 0; i < m_SpawnRows; i++) {
-            if (const int id = m_PhysicsSolver.addObject(glm::vec2(CIRCLE_RADIUS, 10 - (CIRCLE_DIAMETER + 0.1f) * i)); id != -1) {
+            if (const int id = m_PhysicsSolver.addObject(glm::vec2(CIRCLE_RADIUS, 10 + (CIRCLE_DIAMETER + 0.1f) * i)); id != -1) {
                 GameObject &object = m_PhysicsSolver.objects[id];
                 object.lastPosition.x -= CIRCLE_RADIUS * 0.25f + 0.1f;
-                object.color = getRainbowColor();
+                object.color = getRainbowColor(id * COLOR_CYCLE_SPEED);
             }
         }
     }
@@ -164,7 +151,7 @@ void TestScene::render() {
     if (m_PhysicsSolver.count > 0) {
         // write positions to gpu memory
         m_InstanceBuffer.bind();
-        unsigned int updatedSize = m_PhysicsSolver.count * sizeof(glm::vec2);
+        const unsigned int updatedSize = m_PhysicsSolver.count * sizeof(InstanceData);
         if (InstanceData *bufferPtr = (InstanceData*)glMapBufferRange(GL_ARRAY_BUFFER, 0, updatedSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT)) {
             for (unsigned int i = 0; i < m_PhysicsSolver.count; i++) {
                 bufferPtr[i].position = m_PhysicsSolver.objects[i].position;

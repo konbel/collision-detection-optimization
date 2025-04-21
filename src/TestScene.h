@@ -9,15 +9,14 @@
 
 class TestScene : public Scene {
     static constexpr unsigned int CIRCLE_VERTEX_COUNT = 10;
+    static constexpr float MARGIN = 10.0f;
+    static constexpr float COLOR_CYCLE_SPEED = 0.001;
 
     static constexpr float WORLD_SIZE = 300;
-    static constexpr float CIRCLE_RADIUS = 2.0f;
+    static constexpr float CIRCLE_RADIUS = 1.0f;
     static constexpr float CIRCLE_DIAMETER = 2 * CIRCLE_RADIUS;
-    static constexpr float GRAVITY = -200.0f;
-
+    static constexpr float GRAVITY = 150.0f;
     static constexpr unsigned int MAX_OBJECT_COUNT = 1000;
-
-    static constexpr float COLOR_CYCLE_SPEED = 0.001;
 
     VertexArray m_BoxVertexArray;
     IndexBuffer m_BoxIndexBuffer;

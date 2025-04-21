@@ -36,10 +36,10 @@ TestScene::TestScene() : m_BoxIndexBuffer(createBoxIndexBuffer()), m_BoxShader("
     m_BoxVertexArray.bind();
 
     float boxVertices[] = {
-        -WORLD_SIZE,  WORLD_SIZE,
-         WORLD_SIZE,  WORLD_SIZE,
-         WORLD_SIZE, -WORLD_SIZE,
-        -WORLD_SIZE, -WORLD_SIZE,
+        0, 0,
+        WORLD_SIZE, 0,
+        WORLD_SIZE, WORLD_SIZE,
+        0, WORLD_SIZE,
     };
 
     VertexBuffer boxVertexBuffer(boxVertices, 4 * 2 * sizeof(float));
@@ -81,9 +81,12 @@ TestScene::TestScene() : m_BoxIndexBuffer(createBoxIndexBuffer()), m_BoxShader("
     m_CircleIndexBuffer.unbind();
     m_InstanceBuffer.unbind();
 
-    glm::mat4 projection = glm::ortho(-960.0f, 960.0f, -580.0f, 580.0f);
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-    view = glm::scale(view, glm::vec3(1.5f, 1.5f, 1.0f));
+    static constexpr  float ASPECT_RATIO = 1920.0f / 1080.0f;
+    static constexpr float VIEWPORT_HEIGHT = MARGIN * 2 + WORLD_SIZE;
+    static constexpr float VIEWPORT_WIDTH = VIEWPORT_HEIGHT * ASPECT_RATIO;
+
+    const glm::mat4 projection = glm::ortho(0.0f, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, 0.0f);
+    const glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(VIEWPORT_WIDTH / 2 - WORLD_SIZE / 2, VIEWPORT_HEIGHT / 2 - WORLD_SIZE / 2, 0.0f));
 
     m_BoxShader.bind();
     m_BoxShader.setUniformMat4fv("projection", projection);
@@ -140,7 +143,7 @@ void TestScene::update(const float deltaTime) {
     // Spawn objects
     if (m_Emit) {
         for (int i = 0; i < m_SpawnRows; i++) {
-            if (const int id = m_PhysicsSolver.addObject(glm::vec2(-(WORLD_SIZE - CIRCLE_RADIUS), WORLD_SIZE - 20 - (CIRCLE_DIAMETER + 0.1f) * i)); id != -1) {
+            if (const int id = m_PhysicsSolver.addObject(glm::vec2(CIRCLE_RADIUS, 10 - (CIRCLE_DIAMETER + 0.1f) * i)); id != -1) {
                 GameObject &object = m_PhysicsSolver.objects[id];
                 object.lastPosition.x -= CIRCLE_RADIUS * 0.25f + 0.1f;
                 object.color = getRainbowColor();

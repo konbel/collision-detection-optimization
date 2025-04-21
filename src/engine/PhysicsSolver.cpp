@@ -58,15 +58,16 @@ void PhysicsSolver::updateObjects(const float deltaTime) {
         object.acceleration += glm::vec2(0.0f, m_Gravity);
         object.update(deltaTime);
 
-        if (object.position.x > m_WorldSize - m_CircleRadius) {
-            object.position.x = m_WorldSize - m_CircleRadius;
-        } else if (object.position.x < -(m_WorldSize - m_CircleRadius)) {
-            object.position.x = -(m_WorldSize - m_CircleRadius);
+        const float margin = m_CircleRadius;
+        if (object.position.x > m_WorldSize - margin) {
+            object.position.x = m_WorldSize - margin;
+        } else if (object.position.x < margin) {
+            object.position.x = margin;
         }
-        if (object.position.y > m_WorldSize - m_CircleRadius) {
-            object.position.y = m_WorldSize - m_CircleRadius;
-        } else if (object.position.y < -(m_WorldSize - m_CircleRadius)) {
-            object.position.y = -(m_WorldSize - m_CircleRadius);
+        if (object.position.y > m_WorldSize - margin) {
+            object.position.y = m_WorldSize - margin;
+        } else if (object.position.y < margin) {
+            object.position.y = margin;
         }
     }
 }

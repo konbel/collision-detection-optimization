@@ -8,8 +8,9 @@
 #include "imgui_impl_opengl3.h"
 
 #include "TestScene.h"
+#include "ImageScene.h"
 
-#define USE_MIN_FPS 1                           // Note: Using min FPS may affect scene behavior under fluctuating framerate.
+#define USE_MIN_FPS 0                           // Note: Using min FPS may affect scene behavior under fluctuating framerate.
 static constexpr double MIN_FPS = 1 / 60.0f;    //       See main loop comment for more details.
 static constexpr double FPS_CAP = 1 / 60.0f;
 
@@ -52,6 +53,7 @@ int main() {
         currentScene = sceneManager;
 
         sceneManager->registerScene<TestScene>("Test Scene");
+        sceneManager->registerScene<ImageScene>("Image Scene");
 
         double lastUpdateTime = 0;
         double lastFrameTime = 0;

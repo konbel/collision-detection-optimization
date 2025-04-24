@@ -24,6 +24,7 @@ add_executable(collision_detection_optimization src/Application.cpp
         src/engine/CollisionGrid.cpp
 
         src/TestScene.cpp
+        src/ImageScene.cpp
 
         ${IMGUI_DIR}/imgui.cpp
         ${IMGUI_DIR}/imgui_draw.cpp
@@ -31,6 +32,8 @@ add_executable(collision_detection_optimization src/Application.cpp
         ${IMGUI_DIR}/imgui_widgets.cpp
         ${IMGUI_BACKEND_DIR}/imgui_impl_glfw.cpp
         ${IMGUI_BACKEND_DIR}/imgui_impl_opengl3.cpp
+
+        src/vendor/stb-image/stb_image.cpp
 )
 
 include_directories(

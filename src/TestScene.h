@@ -12,11 +12,11 @@ class TestScene : public Scene {
     static constexpr float MARGIN = 10.0f;
     static constexpr float COLOR_CYCLE_SPEED = 0.0001;
 
-    static constexpr float WORLD_SIZE = 300;
+    static constexpr float WORLD_SIZE = 320;
     static constexpr float CIRCLE_RADIUS = 1.0f;
     static constexpr float CIRCLE_DIAMETER = 2 * CIRCLE_RADIUS;
     static constexpr float GRAVITY = 140.0f;
-    static constexpr unsigned int MAX_OBJECT_COUNT = 10000;
+    static constexpr unsigned int MAX_OBJECT_COUNT = 31000;
 
     VertexArray m_BoxVertexArray;
     IndexBuffer m_BoxIndexBuffer;
@@ -32,7 +32,7 @@ class TestScene : public Scene {
     bool m_Paused = false;
 
     bool m_Emit = false;
-    int m_SpawnRows = 8;
+    int m_SpawnRows = 20;
 
     static IndexBuffer createBoxIndexBuffer();
     static IndexBuffer createCircleIndexBuffer();

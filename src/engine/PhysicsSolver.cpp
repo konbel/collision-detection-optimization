@@ -4,7 +4,7 @@
 
 PhysicsSolver::PhysicsSolver(const float worldSize, const float circleRadius, const float circleDiameter, const float gravity, const int maxObjects)
     : m_WorldSize(worldSize), m_CircleRadius(circleRadius), m_CircleDiameter(circleDiameter), m_Gravity(gravity),
-      m_MaxObjects(maxObjects), m_CollisionGrid(m_WorldSize) {
+      m_MaxObjects(maxObjects), m_CollisionGrid(m_WorldSize, m_CircleDiameter) {
     objects.reserve(m_MaxObjects);
 }
 
@@ -55,7 +55,13 @@ void PhysicsSolver::solveContact(const int atomIdx1, const int atomIdx2) {
     }
 }
 
-void PhysicsSolver::checkAtomCellCollision(const int idx, const CollisionCell &c) {
+void PhysicsSolver::checkAtomCellCollision(const int idx, const int cellIdx) {
+    if (cellIdx < 0 || cellIdx >= m_CollisionGrid.size) {
+        return;
+    }
+
+    const CollisionCell &c = m_CollisionGrid.cells[cellIdx];
+
     for (int i = 0; i < c.objectCount; i++) {
         solveContact(idx, c.objects[i]);
     }
@@ -64,30 +70,21 @@ void PhysicsSolver::checkAtomCellCollision(const int idx, const CollisionCell &c
 void PhysicsSolver::checkCellCollision(const CollisionCell &c, const int idx) {
     for (int i = 0; i < c.objectCount; i++) {
         const int atomIdx = c.objects[i];
-        checkAtomCellCollision(atomIdx, m_CollisionGrid.cells[idx - 1]);
-        checkAtomCellCollision(atomIdx, m_CollisionGrid.cells[idx]);
-        checkAtomCellCollision(atomIdx, m_CollisionGrid.cells[idx + 1]);
-        checkAtomCellCollision(atomIdx, m_CollisionGrid.cells[idx + m_CollisionGrid.height - 1]);
-        checkAtomCellCollision(atomIdx, m_CollisionGrid.cells[idx + m_CollisionGrid.height]);
-        checkAtomCellCollision(atomIdx, m_CollisionGrid.cells[idx + m_CollisionGrid.height + 1]);
-        checkAtomCellCollision(atomIdx, m_CollisionGrid.cells[idx - m_CollisionGrid.height - 1]);
-        checkAtomCellCollision(atomIdx, m_CollisionGrid.cells[idx - m_CollisionGrid.height]);
-        checkAtomCellCollision(atomIdx, m_CollisionGrid.cells[idx - m_CollisionGrid.height + 1]);
+
+        checkAtomCellCollision(atomIdx, idx - 1);
+        checkAtomCellCollision(atomIdx, idx);
+        checkAtomCellCollision(atomIdx, idx + 1);
+        checkAtomCellCollision(atomIdx, idx + m_CollisionGrid.height - 1);
+        checkAtomCellCollision(atomIdx, idx + m_CollisionGrid.height);
+        checkAtomCellCollision(atomIdx, idx + m_CollisionGrid.height + 1);
+        checkAtomCellCollision(atomIdx, idx - m_CollisionGrid.height - 1);
+        checkAtomCellCollision(atomIdx, idx - m_CollisionGrid.height);
+        checkAtomCellCollision(atomIdx, idx - m_CollisionGrid.height + 1);
     }
 }
 
 void PhysicsSolver::solveCollisions() {
     for (int i = 0; i < m_CollisionGrid.size; i++) {
-        // skip first and last col
-        // if (i < m_CollisionGrid.height || i >= m_CollisionGrid.size - m_CollisionGrid.height) {
-        //     continue;
-        // }
-
-        // skip first and last row
-        // if (i % m_CollisionGrid.height == 0 || i % (m_CollisionGrid.height - 1) == 0) {
-        //     continue;
-        // }
-
         checkCellCollision(m_CollisionGrid.cells[i], i);
     }
 }

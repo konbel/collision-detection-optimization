@@ -1,8 +1,8 @@
 #include "CollisionGrid.h"
 
-CollisionGrid::CollisionGrid(const int size) {
-    width = size / 2 + 1;
-    height = size / 2 + 1;
+CollisionGrid::CollisionGrid(const int size, const int scale) : m_Scale(scale) {
+    width = size / scale + 1;
+    height = size / scale + 1;
     this->size = width * height;
 
     cells.reserve(this->size);
@@ -18,6 +18,6 @@ void CollisionGrid::clear() {
 }
 
 void CollisionGrid::addObject(const int x, const int y, const int id) {
-    CollisionCell &cell = cells[x / 2 * height + y / 2];
+    CollisionCell &cell = cells[x / m_Scale * height + y / m_Scale];
     cell.addObject(id);
 }

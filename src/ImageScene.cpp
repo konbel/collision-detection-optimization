@@ -1,13 +1,15 @@
-#include "TestScene.h"
+#include "ImageScene.h"
 
 #include "imgui.h"
+
+#include "stb-image/stb_image.h"
 
 struct InstanceData {
     glm::vec2 position;
     glm::vec3 color;
 };
 
-IndexBuffer TestScene::createBoxIndexBuffer() {
+IndexBuffer ImageScene::createBoxIndexBuffer() {
     unsigned int boxIndices[] = {
         0, 1, 2, 3,
     };
@@ -15,7 +17,7 @@ IndexBuffer TestScene::createBoxIndexBuffer() {
     return IndexBuffer(boxIndices, 4);
 }
 
-IndexBuffer TestScene::createCircleIndexBuffer() {
+IndexBuffer ImageScene::createCircleIndexBuffer() {
     unsigned int indices[CIRCLE_VERTEX_COUNT * 3];
 
     for (int i = 0; i < CIRCLE_VERTEX_COUNT - 1; i++) {
@@ -27,7 +29,7 @@ IndexBuffer TestScene::createCircleIndexBuffer() {
     return IndexBuffer(indices, CIRCLE_VERTEX_COUNT * 3);
 }
 
-TestScene::TestScene() : m_BoxIndexBuffer(createBoxIndexBuffer()), m_BoxShader("res/shaders/basic.glsl"),
+ImageScene::ImageScene() : m_BoxIndexBuffer(createBoxIndexBuffer()), m_BoxShader("res/shaders/basic.glsl"),
                          m_CircleIndexBuffer(createCircleIndexBuffer()), m_CircleShader("res/shaders/instanced.glsl"),
                          m_PhysicsSolver(WORLD_SIZE, CIRCLE_RADIUS, CIRCLE_DIAMETER, GRAVITY, MAX_OBJECT_COUNT) {
     VertexBufferLayout layout;
@@ -97,16 +99,15 @@ TestScene::TestScene() : m_BoxIndexBuffer(createBoxIndexBuffer()), m_BoxShader("
     m_CircleShader.setUniformMat4fv("projection", projection);
     m_CircleShader.setUniformMat4fv("view", view);
     m_CircleShader.unbind();
+
+    m_Image = stbi_load(IMAGE_PATH, &m_ImageWidth, &m_ImageHeight, &m_BPP, 3);
+
+    for (glm::vec3 &color : m_Colors) {
+        color = glm::vec3(1.0f);
+    }
 }
 
-glm::vec3 TestScene::getRainbowColor(const float t) {
-    const float r = sin(t);
-    const float g = sin(t + 0.66f * M_PI);
-    const float b = sin(t + 1.32f * M_PI);
-    return glm::vec3(1.0 * r * r, 1.0 * g * g, 1.0 * b * b);
-}
-
-void TestScene::update(const float deltaTime) {
+void ImageScene::update(const float deltaTime) {
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
         m_Paused = false;
     }
@@ -127,21 +128,49 @@ void TestScene::update(const float deltaTime) {
         m_Emit = false;
     }
 
+    if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
+        m_StartSecondPass = true;
+    } else {
+        m_StartSecondPass = false;
+    }
+
     // Spawn objects
     if (m_Emit) {
-        for (int i = 0; i < m_SpawnRows; i++) {
+        for (int i = 0; i < SPAWN_ROWS; i++) {
             if (const int id = m_PhysicsSolver.addObject(glm::vec2(CIRCLE_RADIUS, 10 + (CIRCLE_DIAMETER + 0.1f) * i)); id != -1) {
                 GameObject &object = m_PhysicsSolver.objects[id];
                 object.lastPosition.x -= CIRCLE_RADIUS * 0.25f + 0.1f;
-                object.color = getRainbowColor(id * COLOR_CYCLE_SPEED);
+                object.color = m_Colors[object.getId()];
             }
         }
+    }
+
+    if (m_PhysicsSolver.count == MAX_OBJECT_COUNT && m_StartSecondPass) {
+        // assign colors
+        if ((int)(WORLD_SIZE / CIRCLE_DIAMETER) != m_ImageWidth || (int)(WORLD_SIZE / CIRCLE_DIAMETER) != m_ImageHeight) {
+            std::cout << "Image dimensions don't match world and circle size. May cause unpredictable behavior!" <<
+                         std::endl << "Image pixel = world size / circle diameter" << std::endl;
+        }
+
+        for (int i = 0; i < m_PhysicsSolver.count; i++) {
+            const auto &object = m_PhysicsSolver.objects[i];
+            auto &color = m_Colors[i];
+
+            const int x = (int)(object.position.x - CIRCLE_RADIUS) / (int)CIRCLE_DIAMETER;
+            const int y = (int)(object.position.y - CIRCLE_RADIUS) / (int)CIRCLE_DIAMETER;
+            const int idx = (y * m_ImageWidth + x) * 3;
+            color = glm::vec3(m_Image[idx] / 255.0f, m_Image[idx + 1] / 255.0f, m_Image[idx + 2] / 255.0f);
+        }
+
+        // rerun
+        m_PhysicsSolver.objects.clear();
+        m_PhysicsSolver.count = 0;
     }
 
     m_PhysicsSolver.update(deltaTime);
 }
 
-void TestScene::render() {
+void ImageScene::render() {
     renderer.clear();
 
     // Draw box
@@ -164,7 +193,7 @@ void TestScene::render() {
     }
 }
 
-void TestScene::renderImGui() const {
+void ImageScene::renderImGui() const {
     ImGui::Begin("Stats");
 
     ImGui::Text("Elapsed time: %.1f s", glfwGetTime());
@@ -174,6 +203,6 @@ void TestScene::renderImGui() const {
     ImGui::End();
 }
 
-void TestScene::updateTooSlow() {
+void ImageScene::updateTooSlow() {
     m_Emit = false;
 }

@@ -17,7 +17,7 @@ class PhysicsSolver {
 
     void addObjectsToGrid();
     void solveContact(int atomIdx1, int atomIdx2);
-    void checkAtomCellCollision(int idx, const CollisionCell &c);
+    void checkAtomCellCollision(int idx, int cellIdx);
     void checkCellCollision(const CollisionCell &c, int idx);
     void solveCollisions();
     void updateObjects(float deltaTime);

@@ -23,13 +23,15 @@ struct CollisionCell {
 };
 
 class CollisionGrid {
+    int m_Scale;
+
 public:
     int size;
     int width;
     int height;
     std::vector<CollisionCell> cells;
 
-    CollisionGrid(int size);
+    CollisionGrid(int size, int scale);
 
     void clear();
     void addObject(int x, int y, int id);

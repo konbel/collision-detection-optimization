@@ -4,7 +4,7 @@
 
 PhysicsSolver::PhysicsSolver(const float worldSize, const float circleRadius, const float circleDiameter, const float gravity, const int maxObjects)
     : m_WorldSize(worldSize), m_CircleRadius(circleRadius), m_CircleDiameter(circleDiameter), m_Gravity(gravity),
-      m_MaxObjects(maxObjects), m_CollisionGrid(m_WorldSize, m_CircleDiameter) {
+      m_MaxObjects(maxObjects), m_CollisionGrid((int)m_WorldSize, (int)m_CircleDiameter) {
     objects.reserve(m_MaxObjects);
 }
 
@@ -17,7 +17,7 @@ void PhysicsSolver::update(const float deltaTime) {
     }
 }
 
-int PhysicsSolver::addObject(glm::vec2 position) {
+int PhysicsSolver::addObject(const glm::vec2 position) {
     if (count < m_MaxObjects) {
         const GameObject object(count, position);
         objects.push_back(object);
@@ -30,7 +30,7 @@ int PhysicsSolver::addObject(glm::vec2 position) {
 void PhysicsSolver::addObjectsToGrid() {
     m_CollisionGrid.clear();
     for (const auto &object : objects) {
-        m_CollisionGrid.addObject((int)object.position.x, (int)object.position.y, object.getId());
+        m_CollisionGrid.addObject((int)object.position.x, (int)object.position.y, (int)object.getId());
     }
 }
 
@@ -84,27 +84,74 @@ void PhysicsSolver::checkCellCollision(const CollisionCell &c, const int idx) {
 }
 
 void PhysicsSolver::solveCollisions() {
-    for (int i = 0; i < m_CollisionGrid.size; i++) {
-        checkCellCollision(m_CollisionGrid.cells[i], i);
+    const int sliceSize = m_CollisionGrid.size / THREAD_COUNT;
+    std::thread threads[THREAD_COUNT];
+
+    for (int i = 0; i < THREAD_COUNT; i++) {
+        const int start = i * sliceSize;
+        const int end = start + sliceSize;
+
+        threads[i] = std::thread([start, end, this] {
+            for (int j = start; j < end; j++) {
+                if (j % 2 == 0) {
+                    checkCellCollision(m_CollisionGrid.cells[j], j);
+                }
+            }
+        });
+    }
+
+    for (auto &thread : threads) {
+        thread.join();
+    }
+
+    for (int i = 0; i < THREAD_COUNT; i++) {
+        const int start = i * sliceSize;
+        const int end = start + sliceSize;
+
+        threads[i] = std::thread([start, end, this] {
+            for (int j = start; j < end; j++) {
+                if (j % 2 != 0) {
+                    checkCellCollision(m_CollisionGrid.cells[j], j);
+                }
+            }
+        });
+    }
+
+    for (auto &thread : threads) {
+        thread.join();
     }
 }
 
 void PhysicsSolver::updateObjects(const float deltaTime) {
-    for (int i = 0; i < count; i++) {
-        auto &object = objects[i];
-        object.acceleration += glm::vec2(0.0f, m_Gravity);
-        object.update(deltaTime);
+    const int sliceSize = count / THREAD_COUNT;
+    std::thread threads[THREAD_COUNT];
 
-        const float margin = m_CircleRadius;
-        if (object.position.x > m_WorldSize - margin) {
-            object.position.x = m_WorldSize - margin;
-        } else if (object.position.x < margin) {
-            object.position.x = margin;
-        }
-        if (object.position.y > m_WorldSize - margin) {
-            object.position.y = m_WorldSize - margin;
-        } else if (object.position.y < margin) {
-            object.position.y = margin;
-        }
+    for (int i = 0; i < THREAD_COUNT; i++) {
+        const int start = i * sliceSize;
+        const int end = start + sliceSize;
+
+        threads[i] = std::thread([start, end, deltaTime, this] {
+            for (int j = start; j < end; j++) {
+                auto &object = objects[j];
+                object.acceleration += glm::vec2(0.0f, m_Gravity);
+                object.update(deltaTime);
+
+                const float margin = m_CircleRadius;
+                if (object.position.x > m_WorldSize - margin) {
+                    object.position.x = m_WorldSize - margin;
+                } else if (object.position.x < margin) {
+                    object.position.x = margin;
+                }
+                if (object.position.y > m_WorldSize - margin) {
+                    object.position.y = m_WorldSize - margin;
+                } else if (object.position.y < margin) {
+                    object.position.y = margin;
+                }
+            }
+        });
+    }
+
+    for (auto &thread : threads) {
+        thread.join();
     }
 }

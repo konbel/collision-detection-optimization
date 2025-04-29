@@ -84,40 +84,43 @@ void PhysicsSolver::checkCellCollision(const CollisionCell &c, const int idx) {
 }
 
 void PhysicsSolver::solveCollisions() {
-    const int sliceSize = m_CollisionGrid.size / THREAD_COUNT;
-    std::thread threads[THREAD_COUNT];
+    constexpr int SLICE_COUNT = 2 * THREAD_COUNT;
+    const int sliceSize = m_CollisionGrid.width / SLICE_COUNT * m_CollisionGrid.height;
+    const int lastCell = SLICE_COUNT * sliceSize;
 
     for (int i = 0; i < THREAD_COUNT; i++) {
-        const int start = i * sliceSize;
+        const int start = 2 * i * sliceSize;
         const int end = start + sliceSize;
 
-        threads[i] = std::thread([start, end, this] {
+        m_Threads[i] = std::thread([start, end, this] {
             for (int j = start; j < end; j++) {
-                if (j % 2 == 0) {
-                    checkCellCollision(m_CollisionGrid.cells[j], j);
-                }
+                checkCellCollision(m_CollisionGrid.cells[j], j);
             }
         });
     }
 
-    for (auto &thread : threads) {
+    for (auto &thread : m_Threads) {
         thread.join();
     }
 
+    if (lastCell < m_CollisionGrid.size) {
+        for (int j = lastCell; j < m_CollisionGrid.size; j++) {
+            checkCellCollision(m_CollisionGrid.cells[j], j);
+        }
+    }
+
     for (int i = 0; i < THREAD_COUNT; i++) {
-        const int start = i * sliceSize;
+        const int start = (2 * i + 1) * sliceSize;
         const int end = start + sliceSize;
 
-        threads[i] = std::thread([start, end, this] {
+        m_Threads[i] = std::thread([start, end, this] {
             for (int j = start; j < end; j++) {
-                if (j % 2 != 0) {
-                    checkCellCollision(m_CollisionGrid.cells[j], j);
-                }
+                checkCellCollision(m_CollisionGrid.cells[j], j);
             }
         });
     }
 
-    for (auto &thread : threads) {
+    for (auto &thread : m_Threads) {
         thread.join();
     }
 }

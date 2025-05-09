@@ -172,6 +172,15 @@ void TestScene::renderImGui() const {
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
     ImGui::End();
+
+    ImGui::Begin("Controls");
+
+    ImGui::Text("Pause                                      S");
+    ImGui::Text("Resume                                     R");
+    ImGui::Text("Stop Emit                              Space");
+    ImGui::Text("Resume Emit                            Enter");
+
+    ImGui::End();
 }
 
 void TestScene::updateTooSlow() {

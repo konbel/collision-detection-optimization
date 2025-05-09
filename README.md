@@ -6,12 +6,12 @@
 2. [Compilation](#compilation)
 3. [Disclaimer](#disclaimer)
 4. [Technical Details](#technical-details)
-	1. [Initial Setup](#initial-setup)
-	2. [Rendering](#rendering)
-	3. [Physics and Collisions](#physics-and-collisions)
-	4. [Spatial Partitioning](#spatial-partitioning)
-	5. [Multithreading](#multithreading)
-	6. [Compiler Optimization](#compiler-optimization)
+	1. [Initial Setup](#-initial-setup)
+	2. [Rendering](#-rendering)
+	3. [Physics and Collisions](#-physics-and-collisions)
+	4. [Spatial Partitioning](#-spatial-partitioning)
+	5. [Multithreading](#-multithreading)
+	6. [Compiler Optimization](#-compiler-optimization)
 5. [What I learned](#what-i-learned)
 6. [Cool Stuff](#cool-stuff)
 
@@ -40,29 +40,29 @@ Place the `res` directory alongside the executable (this is handled automaticall
 
 Performance benchmarks were run to measure how many objects the simulation supports before dropping below 60 fps. Tests were run on my personal laptop without compiler optimizations unless otherwise noted. Solely to get a rough comparison of performance for each step.
 
-### Initial Setup
+### 🛠️ Initial Setup
 
-The baseline system included rendering, gravity, velocity, and scene management, but no collisions. Each circle had its own draw call, maxing out around 5500 objects due to CPU overhead.
+The baseline system included rendering, gravity, velocity, and scene management, but no collisions. Each circle had its own draw call, maxing out around **5500 objects** due to CPU overhead.
 
-### Rendering
+### 🎨 Rendering
 
-Switching to instanced rendering allowed letting the GPU do the heavy lifting and packing everything into one draw call. Using `glMapBufferRange`, object transforms are uploaded efficiently to the GPU, increasing support to over 100,000 objects.
+Switching to instanced rendering allowed letting the GPU do the heavy lifting and packing everything into one draw call. Using `glMapBufferRange`, object transforms are uploaded efficiently to the GPU, increasing support to over **100,000 objects**.
 
-### Physics and Collisions
+### ⚙️ Physics and Collisions
 
-The initial implementation used semi-implicit Euler integration but switched to Verlet integration for stability (and I didn’t know that existed at the beginning). A naive O(n^2) pairwise collision check limited support to \~580 objects.
+The initial implementation used semi-implicit Euler integration but switched to Verlet integration for stability (and I didn’t know that existed at the beginning). A naive O(n^2) pairwise collision check limited support to **\~580 objects**.
 
-### Spatial Partitioning
+### 🧩 Spatial Partitioning
 
-Dividing the world into a uniform grid (cells sized to circle diameter) improved performance drastically. Each object is now checked only against neighbors in its own cell and the surrounding 8. This allowed \~6600 objects — a 11× improvement.
+Dividing the world into a uniform grid (cells sized to circle diameter) improved performance drastically. Each object is now checked only against neighbors in its own cell and the surrounding 8. This allowed **\~6600 object — a 11× improvement**.
 
-### Multithreading
+### 🧵 Multithreading
 
-The grid-based collision detection was parallelized by assigning non-overlapping grid slices to threads. A two-pass approach prevents data races by ensuring threads process alternating slices. This raised capacity to \~21,600 objects using 10 threads.
+The grid-based collision detection was parallelized by assigning non-overlapping grid slices to threads. A two-pass approach prevents data races by ensuring threads process alternating slices. This raised capacity to **\~21,600 objects** using 10 threads.
 
-### Compiler Optimization
+### 🚀 Compiler Optimization
 
-With `-O3`, the simulation handled over 110,000 objects. Turns out, with a bit of compiler fairy dust, the simulation runs a lot better. Performance bottlenecks then shifted to grid overhead. For example, at 110,000 objects, increasing the grid from 600×600 to 620×620 grid cells, the frame rate dropped from ~140 to ~60.
+With `-O3`, the simulation handled over **110,000 objects**. Turns out, with a bit of compiler fairy dust, the simulation runs a lot better. Performance bottlenecks then shifted to grid overhead. For example, at 110,000 objects, increasing the grid from 600×600 to 620×620 grid cells, the frame rate dropped from ~140 to ~60.
 
 ## What I learned
 

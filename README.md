@@ -19,6 +19,10 @@
 
 This project is basically a bunch of circles getting the opportunity to experience physics thanks to Verlet integration and a custom collision solver. Scroll down for a litte detour on how I made it and more importantly how I made it faster.
 
+<p align="center">
+    <img src="/images/rainbow.png" width="500">
+</p>
+
 ## Disclaimer
 
 Shoutout to Jean Tampon for the awesome [project](https://github.com/johnBuffer/VerletSFML-Multithread) and [video](https://youtu.be/9IULfQH7E90?si=OxRCw2NqhMKmwj62) that inspired me! I wanted to see if I could pull off something similar while practicing my C++ and OpenGL skills for university classes. Most of it is built from scratch, but I did borrow a bit of wisdom—especially around Verlet integration.
@@ -72,6 +76,11 @@ As someone still new to C++, this project was a great learning experience in bot
 
 Due to the deterministic nature of the simulation it supports creative experiments—e.g., assigning colors to the circles based on an image and replaying the same simulation to display the image using the circles and seeing how it slowly comes together.
 You can also explore other effects by setting the gravity to a single point in space or changing the interaction rules.
+
+<p float="left">
+    <img src="/images/image1.png" width="500" />
+    <img src="/images/image2.png" width="500" /> 
+</p>
 
 ---
 

@@ -77,9 +77,9 @@ As someone still new to C++, this project was a great learning experience in bot
 Due to the deterministic nature of the simulation it supports creative experiments—e.g., assigning colors to the circles based on an image and replaying the same simulation to display the image using the circles and seeing how it slowly comes together.
 You can also explore other effects by setting the gravity to a single point in space or changing the interaction rules.
 
-<p float="left">
-    <img src="/images/image1.png" width="500" />
-    <img src="/images/image2.png" width="500" /> 
+<p float="left" align="center">
+    <img src="/images/image1.png" width="400" />
+    <img src="/images/image2.png" width="400" /> 
 </p>
 
 ---
